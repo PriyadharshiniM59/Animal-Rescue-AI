@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Admin Dashboard | Command Center</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; padding: 20px; color: #2d3436; }
+        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 1100px; margin: auto; }
+        
+        .stats-bar { display: flex; gap: 15px; margin: 20px 0; }
+        .stat-box { flex: 1; color: white; padding: 20px; border-radius: 12px; text-align: center; transition: transform 0.2s; }
+        .stat-box:hover { transform: translateY(-5px); }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th { background: #d63031; color: white; padding: 12px; text-align: left; text-transform: uppercase; font-size: 13px; }
+        td { padding: 12px; border-bottom: 1px solid #eee; vertical-align: middle; }
+        
+        .badge { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; display: inline-block; }
+        .critical { background: #ff7675; color: white; }
+        .invalid { background: #dfe6e9; color: #636e72; }
+        
+        img { width: 100px; height: 75px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
+        input[type="text"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px; box-sizing: border-box; font-size: 16px; }
+        .btn-finish { background: #00b894; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>🐾 Emergency Command Center</h1>
+
+        <div class="stats-bar">
+            <div class="stat-box" style="background: #0984e3;">
+                <div style="font-size: 12px; font-weight: bold; opacity: 0.8;">TOTAL REPORTS</div>
+                <div style="font-size: 32px; font-weight: bold;">{{ total }}</div>
+            </div>
+            <div class="stat-box" style="background: #d63031;">
+                <div style="font-size: 12px; font-weight: bold; opacity: 0.8;">PENDING CASES</div>
+                <div style="font-size: 32px; font-weight: bold;">{{ pending }}</div>
+            </div>
+            <div class="stat-box" style="background: #00b894;">
+                <div style="font-size: 12px; font-weight: bold; opacity: 0.8;">RESCUED ANIMALS</div>
+                <div style="font-size: 32px; font-weight: bold;">{{ rescued }}</div>
+            </div>
+        </div>
+
+        <input type="text" id="searchID" onkeyup="searchTable()" placeholder="🔍 Search by Report ID or Animal Type...">
+
+        <p>AI Neural Network Status: <span id="ai-status" style="color: blue; font-weight: bold;">Loading MobileNet...</span></p>
+
+        <table id="reportTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Photo</th>
+                    <th>AI Analysis</th>
+                    <th>Location</th>
+                    <th>Status & Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in reports %}
+                <tr class="report-row" data-id="{{ loop.index }}">
+                    <td style="font-weight: bold; color: #d63031;">#{{ report[0] }}</td>
+                    <td>
+                        <img id="img-{{ loop.index }}" src="/static/uploads/{{ report[4] }}" crossorigin="anonymous">
+                    </td>
+                    <td>
+                        <span id="pred-{{ loop.index }}" style="font-weight: bold; text-transform: capitalize;">Scanning...</span><br>
+                        <span id="tag-{{ loop.index }}" class="badge" style="background: #ffeaa7; color: #d6a017;">Processing</span>
+                    </td>
+                    <td>
+                        <a href="https://www.google.com/maps?q={{ report[7] }},{{ report[8] }}" target="_blank" style="text-decoration: none; color: #0984e3; font-weight: bold;">📍 Open GPS Map</a>
+                    </td>
+                    <td>
+                        {% if report[6] == 'RESCUED' %}
+                            <span style="color: #00b894; font-weight: bold;">✔ RESCUED</span>
+                        {% else %}
+                            <form action="/upload_rescue/{{ report[0] }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 5px;">
+                                <input type="file" name="rescue_photo" accept="image/*" required style="font-size: 11px;">
+                                <button type="submit" class="btn-finish">SUBMIT PROOF</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function runAI() {
+            try {
+                const model = await mobilenet.load();
+                document.getElementById('ai-status').innerText = "ONLINE";
+                document.getElementById('ai-status').style.color = "green";
+                
+                const rows = document.querySelectorAll('.report-row');
+                for (let row of rows) {
+                    const index = row.getAttribute('data-id');
+                    const tag = document.getElementById(`tag-${index}`);
+                    
+                    if (tag.innerText !== "Processing") continue;
+
+                    const img = document.getElementById(`img-${index}`);
+                    const predictions = await model.classify(img);
+                    const label = predictions[0].className.toLowerCase();
+                    
+                    // COMPREHENSIVE KEYWORD LIST (Covers Brambling, Pigeon, and 50+ common street animals)
+                    const animalKeywords = /(dog|cat|bird|pigeon|crow|sparrow|hen|rooster|duck|goat|cow|bull|ox|sheep|monkey|ape|snake|lizard|turtle|insect|butterfly|wasp|bee|dingo|terrier|retriever|shepherd|husky|beagle|feline|canine|brambling|finch|robin|eagle|hawk|animal|creature|mammal|wildlife|beast|pet|fauna)/i;
+                    
+                    const isAnimal = animalKeywords.test(label);
+                    
+                    document.getElementById(`pred-${index}`).innerText = predictions[0].className.split(',')[0];
+                    
+                    if (isAnimal) {
+                        tag.innerText = "CRITICAL (VERIFIED)";
+                        tag.className = "badge critical";
+                    } else {
+                        tag.innerText = "REJECTED (NOT ANIMAL)";
+                        tag.className = "badge invalid";
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('ai-status').innerText = "OFFLINE / ERROR";
+            }
+        }
+
+        function searchTable() {
+            let input = document.getElementById("searchID").value.toUpperCase();
+            let table = document.getElementById("reportTable");
+            let tr = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < tr.length; i++) {
+                let tdID = tr[i].getElementsByTagName("td")[0];
+                let tdType = tr[i].getElementsByTagName("td")[2];
+                if (tdID || tdType) {
+                    let txtValueID = tdID.textContent || tdID.innerText;
+                    let txtValueType = tdType.textContent || tdType.innerText;
+                    if (txtValueID.toUpperCase().indexOf(input) > -1 || txtValueType.toUpperCase().indexOf(input) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
+        window.onload = runAI;
+    </script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Report Emergency | AI Rescue</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: sans-serif; padding: 20px; background-color: #f9f9f9; text-align: center; }
+        .box { border: 1px solid #ddd; padding: 20px; border-radius: 15px; max-width: 400px; margin: auto; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        input, select, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
+        button { background: #e74c3c; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #c0392b; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>🐾 Report Animal</h2>
+        <form action="/report" method="POST" enctype="multipart/form-data">
+            <input type="text" name="animal_type" placeholder="What animal? (e.g. Dog)" required>
+            <select name="injury">
+                <option value="bleeding">Bleeding / Wound</option>
+                <option value="fracture">Broken Bone</option>
+                <option value="heatstroke">Fainted / Heatstroke</option>
+            </select>
+            <input type="text" name="location" placeholder="Landmark (Optional)">
+            <input type="file" name="photo" accept="image/*" capture="camera" required>
+            
+            <input type="hidden" id="lat" name="lat">
+            <input type="hidden" id="lon" name="lon">
+            
+            <button type="submit">SUBMIT EMERGENCY</button>
+        </form>
+    </div>
+
+    <script>
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                document.getElementById('lat').value = pos.coords.latitude;
+                document.getElementById('lon').value = pos.coords.longitude;
+            });
+        }
+    </script>
+</body>
+</html>

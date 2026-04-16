@@ -1,0 +1,30 @@
+# --- Python & Environment ---
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.env
+
+# --- Database ---
+# We ignore the actual data file to keep the repo clean and private
+*.db
+*.sqlite3
+
+# --- User Uploads ---
+# This ignores all photos you've taken during testing 
+# but keeps the 'no_image.png' so the app doesn't crash for others
+static/uploads/*
+!static/uploads/no_image.png
+
+# --- Mac System Files ---
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# --- VS Code Settings ---
+.vscode/
+*.code-workspace
+
+# --- Logs ---
+*.loggit 

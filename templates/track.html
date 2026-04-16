@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracking Report #{{ report[0] }}</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 20px; text-align: center; color: #2d3436; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .status-box { font-size: 22px; font-weight: bold; margin: 20px 0; padding: 10px; border-radius: 10px; }
+        .pending { background: #fff3cd; color: #856404; }
+        .rescued { background: #d4edda; color: #155724; }
+        .img-label { font-weight: bold; margin-top: 15px; display: block; color: #636e72; }
+        img { width: 100%; border-radius: 12px; margin-top: 8px; border: 3px solid #eee; }
+        .btn-home { display: inline-block; margin-top: 25px; color: #0984e3; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Report #{{ report[0] }}</h1>
+        
+        <div class="status-box {{ 'rescued' if report[6] == 'RESCUED' else 'pending' }}">
+            Status: {{ report[6] }}
+        </div>
+
+        <span class="img-label">Original Photo (Injured):</span>
+        <img src="/static/uploads/{{ report[4] }}">
+
+        <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+
+        {% if report[9] %}
+            <h2 style="color: #27ae60;">🐾 Great News!</h2>
+            <p>A volunteer has rescued this animal. See the update below:</p>
+            <span class="img-label">Rescue Proof (Cured/Safe):</span>
+            <img src="/static/uploads/{{ report[9] }}" style="border-color: #2ecc71;">
+        {% else %}
+            <p style="color: #636e72;">Our volunteers are currently navigating to the GPS location. Please keep this page open for updates!</p>
+        {% endif %}
+
+        <a href="/" class="btn-home">← Back to Home</a>
+    </div>
+</body>
+</html>

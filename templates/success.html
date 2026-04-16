@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Success | AI Rescue</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px 20px; background: #f0f2f5; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        .id-box { font-size: 32px; font-weight: bold; color: #d63031; margin: 20px 0; border: 2px dashed #d63031; padding: 15px; display: inline-block; border-radius: 10px; }
+        .btn { background: #0984e3; color: white; padding: 15px 25px; text-decoration: none; border-radius: 10px; display: block; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1 style="color: #00b894;">Report Received!</h1>
+        <p>Your Unique Tracking ID:</p>
+        <div class="id-box">#{{ report_id }}</div>
+        <p>Take a screenshot to track the rescue later!</p>
+        <a href="/track/{{ report_id }}" class="btn">LIVE RESCUE TRACKER</a>
+    </div>
+</body>
+</html>
